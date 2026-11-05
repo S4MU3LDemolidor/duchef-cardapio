@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>DuChef · QR codes das mesas</title>
+<link rel="icon" href="icons/favicon.png" type="image/png">
+<style>
+@font-face{font-family:Fredoka;font-weight:600;font-display:swap;src:url(fonts/fredoka-600.woff2) format('woff2')}
+@font-face{font-family:Fredoka;font-weight:700;font-display:swap;src:url(fonts/fredoka-700.woff2) format('woff2')}
+@font-face{font-family:Poppins;font-weight:400;font-display:swap;src:url(fonts/poppins-400.woff2) format('woff2')}
+@font-face{font-family:Poppins;font-weight:600;font-display:swap;src:url(fonts/poppins-600.woff2) format('woff2')}
+:root{--red:#D7161A;--wine:#8C0F13;--cream:#FCF6E3;--mus:#F2B137;--dark:#1C1512;--muted:#7a6a5c;--line:#eee3c8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Poppins,system-ui,sans-serif;background:#efe6cf;color:var(--dark);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ctl{max-width:820px;margin:0 auto;padding:24px 16px 8px}
+.ctl h1{font-family:Fredoka;font-weight:700;font-size:28px;color:var(--red)}
+.ctl p{color:var(--muted);font-size:14px;margin-top:4px}
+.form{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-top:16px;background:#fff;border-radius:16px;padding:14px}
+.form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;font-weight:600;color:var(--wine)}
+.form input[type=number],.form input[type=url]{font:inherit;font-size:16px;border:1.5px solid var(--line);border-radius:10px;padding:9px 10px;width:96px}
+.form input[type=url]{width:min(100%,340px)}
+.form .ck{flex-direction:row;align-items:center;gap:8px;font-weight:500;color:var(--dark);padding-bottom:10px}
+.form button{background:var(--red);color:#fff;border:0;border-radius:12px;padding:12px 20px;font-family:Fredoka;font-weight:600;font-size:17px;cursor:pointer}
+.info{font-size:12.5px;color:var(--muted);margin-top:10px}
+.sheet{display:grid;grid-template-columns:repeat(auto-fill,95mm);justify-content:center;gap:0;padding:16px 0 40px}
+.card{width:95mm;height:92mm;padding:4mm;break-inside:avoid;page-break-inside:avoid}
+.in{height:100%;background:var(--cream);border:1.5px dashed #c9b994;border-radius:6mm;overflow:hidden;display:flex;flex-direction:column;align-items:center}
+.top{width:100%;background:var(--red);display:flex;align-items:center;justify-content:space-between;padding:3mm 5mm}
+.top img{height:12mm;width:auto}
+.top b{font-family:Fredoka;font-weight:700;color:var(--cream);font-size:7mm;line-height:1;text-align:right}
+.top b small{display:block;font-size:3mm;font-weight:600;letter-spacing:.25em;opacity:.85}
+.qr{background:#fff;border-radius:3mm;padding:2.2mm;margin-top:3.5mm}
+.qr svg{display:block;width:37mm;height:37mm}
+.tx{font-family:Fredoka;font-weight:600;font-size:4.6mm;color:var(--wine);margin-top:3mm;text-align:center;line-height:1.15}
+.sm{font-size:2.9mm;color:var(--muted);text-align:center;margin-top:1mm;padding:0 5mm}
+@page{size:A4;margin:10mm}
+@media print{body{background:#fff}.ctl{display:none}.sheet{padding:0;grid-template-columns:repeat(2,95mm)}}
+</style>
+</head>
+<body>
+<div class="ctl">
+  <h1>QR codes das mesas</h1>
+  <p>Escolha as mesas, toque em Imprimir e recorte na linha tracejada. Cada QR já abre o cardápio com o número da mesa preenchido.</p>
+  <div class="form">
+    <label>Da mesa<input type="number" id="de" value="1" min="1" max="200"></label>
+    <label>até<input type="number" id="ate" value="12" min="1" max="200"></label>
+    <label class="ck"><input type="checkbox" id="geral" checked> Incluir QR geral (balcão e delivery)</label>
+    <label>Endereço do cardápio<input type="url" id="url"></label>
+    <button id="print">Imprimir</button>
+  </div>
+  <p class="info">Dica: na janela de impressão, escolha "Salvar como PDF" para mandar para a gráfica. Tamanho A4, 6 por folha.</p>
+</div>
+<div class="sheet" id="sheet"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+const SITE="https://s4mu3ldemolidor.github.io/duchef-cardapio/";
+const $=s=>document.querySelector(s);
+$("#url").value=SITE;
+function qrSvg(text){const q=qrcode(0,"M");q.addData(text);q.make();const n=q.getModuleCount();let d="";
+ for(let r=0;r<n;r++)for(let c=0;c<n;c++)if(q.isDark(r,c))d+=`M${c} ${r}h1v1h-1z`;
+ return`<svg viewBox="-1 -1 ${n+2} ${n+2}" shape-rendering="crispEdges" role="img" aria-label="QR code"><path d="${d}" fill="#1C1512"/></svg>`}
+function card(label,sub,link){return`<div class="card"><div class="in"><div class="top"><img src="img/logo.png" alt="DuChef Pizzaria"><b>${label}${sub?`<small>${sub}</small>`:""}</b></div>
+ <div class="qr">${qrSvg(link)}</div><div class="tx">Aponte a câmera e peça por aqui</div><div class="sm">Escolha no celular e envie pelo WhatsApp 🍕</div></div></div>`}
+function build(){if(typeof qrcode!=="function"){$("#sheet").innerHTML='<p class="info" style="text-align:center">Não deu pra carregar o gerador de QR. Confira a internet e recarregue a página.</p>';return}
+ let base=($("#url").value||SITE).trim();if(!/\/$/.test(base)&&!/\.html?$/.test(base))base+="/";
+ let a=Math.max(1,+$("#de").value||1),b=Math.min(200,Math.max(a,+$("#ate").value||a));let h="";
+ if($("#geral").checked)h+=card("Cardápio","","" + base);
+ for(let i=a;i<=b;i++)h+=card("Mesa "+i,"",base+"?mesa="+i);
+ $("#sheet").innerHTML=h}
+["de","ate","geral","url"].forEach(id=>$("#"+id).addEventListener("input",build));
+$("#print").onclick=()=>print();
+build();
+</script>
+</body>
+</html>
